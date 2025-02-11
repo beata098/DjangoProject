@@ -1,0 +1,114 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="container position-relative">
+
+    <div class="quote-box">
+        <strong>Cytat:</strong>
+        <p class="mb-0">"{{ quote }}"</p>
+    </div>
+
+    <h2 style="font-size: 2rem; font-weight: bold;">Witaj, {{ username }}!</h2>
+    <p>Miło Cię widzieć</p>
+
+    <div class="row">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">💪 Twoje treningi (z ostatnich 7 dni)</h2>
+                    {% if recent_workouts %}
+                        <ul class="list-group">
+                            {% for workout in recent_workouts %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        {{ workout.date|date:"d.m.Y" }} - Plan: {{ workout.training_day.plan.name }}, Dzień: {{ workout.training_day.day_number }}
+                                    </span>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>Nie masz zapisanych treningów z ostatnich 7 dni.</p>
+                    {% endif %}
+                    <a href="{% url 'workout_history' %}" class="btn btn-secondary">📖 Historia treningów</a>
+                    <a href="{% url 'add_workout' %}" class="btn btn-success">Dodaj trening</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <br>
+
+    <h2>📈 Wybierz ćwiczenie do analizy postępów</h2>
+    <form method="get">
+        <select name="exercise" class="form-control" onchange="this.form.submit()">
+            <option value="">-- Wybierz ćwiczenie --</option>
+            {% for exercise in user_exercises %}
+                <option value="{{ exercise }}" {% if selected_exercise == exercise %}selected{% endif %}>
+                    {{ exercise }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+
+    <br>
+
+    {% if chart_data %}
+        <h2 class="mt-4">Twój progres w ćwiczeniu: {{ selected_exercise }}</h2>
+        <div>
+            <canvas id="progressChart"></canvas>
+        </div>
+    {% endif %}
+
+    <br>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title">📊 Ostatnie pomiary</h2>
+                    <a href="{% url 'progress' %}" class="btn btn-success">Zobacz postępy</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if chart_data %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    var ctx = document.getElementById('progressChart').getContext('2d');
+    var progressChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Ciężar (kg)',
+                data: {{ chart_data|safe }},
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+</script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (window.location.search.includes("exercise=")) {
+            document.getElementById("progressChart")?.scrollIntoView({ behavior: "smooth" });
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}
+
+
+
+

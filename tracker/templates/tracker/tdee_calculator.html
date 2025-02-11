@@ -1,0 +1,38 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>🔥 Kalkulator Kalorii (TDEE)</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label>Waga (kg):</label>
+        <input type="number" name="weight" class="form-control" required>
+        <label>Wzrost (cm):</label>
+        <input type="number" name="height" class="form-control" required>
+        <label>Wiek:</label>
+        <input type="number" name="age" class="form-control" required>
+        <label>Płeć:</label>
+        <div style="display: flex; gap: 40px; align-items: center;">
+            <label for="male" style="font-weight: normal;">
+                <input type="radio" id="male" name="sex" value="male"> Mężczyzna
+            </label>
+            <label for="female" style="font-weight: normal;">
+                <input type="radio" id="female" name="sex" value="female"> Kobieta
+            </label>
+        </div>
+        <label style="display: block; margin-top: 10px;">Poziom aktywności:</label>
+        <select name="activity_level" class="form-control">
+            <option value="1.2">Niski (brak aktywności fizycznej, siedzący tryb życia)</option>
+            <option value="1.375">Lekki (sporadyczna aktywność, lekkie treningi 1-2 razy w tygodniu)</option>
+            <option value="1.55">Średni (regularne ćwiczenia 3-4 razy w tygodniu, umiarkowana aktywność)</option>
+            <option value="1.725">Wysoki (intensywne treningi 5-7 razy w tygodniu, wysoka aktywność)</option>
+        </select>
+        <br>
+        <button type="submit" class="btn btn-success">Oblicz TDEE</button>
+    </form>
+
+    {% if tdee %}
+        <h3>Twoje zapotrzebowanie kaloryczne: {{ tdee }} kcal</h3>
+    {% endif %}
+</div>
+{% endblock %}

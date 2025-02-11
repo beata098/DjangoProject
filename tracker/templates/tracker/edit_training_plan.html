@@ -1,0 +1,45 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Edytuj Plan Treningowy: {{ plan.nazwa }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">💾 Zapisz zmiany</button>
+    </form>
+
+    <hr>
+
+    <h3>Ćwiczenia w planie</h3>
+    {% if plan.training_days.all %}
+        {% for day in plan.training_days.all %}
+            <div class="day-section p-3 mb-3 border rounded bg-light">
+                <h4 class="fw-bold">🗓 Dzień {{ day.day_number }}</h4>
+                <ul class="list-group">
+                    {% for exercise in day.exercises.all %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span class="fw-bold">{{ exercise.nazwa }} - {{ exercise.serie }} serii x {{ exercise.powtorzenia }} powtórzeń</span>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <a href="{% url 'edit_exercise' exercise.id %}" class="btn btn-warning btn-sm">✏ Edytuj</a>
+                                <a href="{% url 'delete_exercise' exercise.id %}" class="btn btn-danger btn-sm">🗑 Usuń</a>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item">Brak ćwiczeń dla tego dnia.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Brak ćwiczeń w tym planie.</p>
+    {% endif %}
+
+    <br>
+    <a href="{% url 'add_exercise_to_plan' plan.id %}" class="btn btn-primary">➕ Dodaj Ćwiczenie</a>
+
+    <br><br>
+    <a href="{% url 'training_plans' %}" class="btn btn-secondary">🔙 Powrót</a>
+</div>
+{% endblock %}

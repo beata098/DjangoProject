@@ -1,0 +1,22 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>📏 Dodaj Nowy Pomiar</h2>
+
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <strong>Błąd!</strong> Popraw poniższe pola.
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">💾 Zapisz Pomiar</button>
+    </form>
+
+    <br>
+    <a href="{% url 'progress' %}" class="btn btn-secondary">🔙 Powrót</a>
+</div>
+{% endblock %}

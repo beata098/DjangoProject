@@ -1,0 +1,25 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Dodaj Nowy Plan Treningowy</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Zapisz Plan</button>
+    </form>
+
+    {% if plan %}
+        <!-- Przycisk przekierowujący do definiowania ćwiczeń -->
+        <a href="{% url 'define_training_plan' plan.id %}" class="btn btn-primary">
+            ➕ Zdefiniuj Ćwiczenia dla Tego Planu
+        </a>
+    {% endif %}
+
+    <br>
+    <a href="{% url 'training_plans' %}" class="back-link">
+        🔙 Wróć do Planów Treningowych
+    </a>
+</div>
+{% endblock %}

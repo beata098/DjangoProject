@@ -1,0 +1,14 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>🗑 Usuń Trening</h2>
+    <p>Czy na pewno chcesz usunąć trening z dnia {{ workout.date|date:"d.m.Y" }}?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Tak, usuń</button>
+        <a href="{% url 'workout_history' %}" class="btn btn-secondary">Anuluj</a>
+    </form>
+</div>
+{% endblock %}

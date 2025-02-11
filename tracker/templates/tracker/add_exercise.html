@@ -1,0 +1,24 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Dodaj ćwiczenia do Dnia {{ day.day_number }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Dodaj ćwiczenie</button>
+    </form>
+
+    <h3>Ćwiczenia dla tego dnia:</h3>
+    <ul>
+        {% for exercise in day.exercises.all %}
+            <li>{{ exercise.name }} - {{ exercise.sets }}x{{ exercise.reps }} ({{ exercise.weight }} kg)</li>
+        {% empty %}
+            <li>Brak ćwiczeń.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'define_training_plan' day.plan.id %}" class="back-link">← Wróć do planu</a>
+</div>
+{% endblock %}

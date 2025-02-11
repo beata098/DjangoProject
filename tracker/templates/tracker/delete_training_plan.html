@@ -1,0 +1,13 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<h2>🗑️ Usuń Plan: {{ plan.name }}</h2>
+
+<p>Czy na pewno chcesz usunąć ten plan?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">✅ Tak, usuń</button>
+    <a href="{% url 'training_plans' %}">❌ Anuluj</a>
+</form>
+{% endblock %}

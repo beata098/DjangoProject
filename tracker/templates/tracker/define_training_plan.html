@@ -1,0 +1,39 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Zdefiniuj ćwiczenia dla planu: {{ plan.name }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <label for="training_day">Wybierz dzień treningowy:</label>
+        <select name="training_day" id="training_day" required>
+            {% for day in training_days %}
+                <option value="{{ day.id }}">Dzień {{ day.day_number }}</option>
+            {% endfor %}
+        </select>
+
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">
+            ➕ Dodaj Ćwiczenie
+        </button>
+    </form>
+
+    <h3>Obecne ćwiczenia:</h3>
+    {% for day in training_days %}
+        <h4>Dzień {{ day.day_number }}</h4>
+        <ul>
+            {% for exercise in day.exercises.all %}
+                <li>{{ exercise.nazwa }} - {{ exercise.serie }}x{{ exercise.powtorzenia }}</li>
+            {% empty %}
+                <li>Brak ćwiczeń</li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+
+    <a href="{% url 'training_plans' %}" class="btn btn-primary mt-3">
+        ✔ Zapisz Plan i wróć do listy
+    </a>
+</div>
+{% endblock %}

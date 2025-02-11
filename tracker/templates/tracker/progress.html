@@ -1,0 +1,259 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Historia Pomiarów -->
+    <div class="card shadow-lg rounded-3">
+        <div class="card-body">
+            <h2 class="mb-4 text-center text-primary"><i class="fas fa-chart-line"></i> 📈 Historia Pomiarów</h2>
+
+            {% if measurements %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover table-bordered text-center align-middle custom-table">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Data</th>
+                                <th>Waga (kg)</th>
+                                <th>Obwód klatki</th>
+                                <th>Obwód talii</th>
+                                <th>Obwód bioder</th>
+                                <th>Obwód ręki</th>
+                                <th>Obwód uda</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for measurement in measurements %}
+                                <tr>
+                                    <td>{{ measurement.date|date:"d.m.Y" }}</td>
+                                    <td contenteditable="true" data-field="weight" data-id="{{ measurement.id }}">{{ measurement.weight }}</td>
+                                    <td contenteditable="true" data-field="chest" data-id="{{ measurement.id }}">{{ measurement.chest|default:"-" }}</td>
+                                    <td contenteditable="true" data-field="waist" data-id="{{ measurement.id }}">{{ measurement.waist|default:"-" }}</td>
+                                    <td contenteditable="true" data-field="hips" data-id="{{ measurement.id }}">{{ measurement.hips|default:"-" }}</td>
+                                    <td contenteditable="true" data-field="arms" data-id="{{ measurement.id }}">{{ measurement.arms|default:"-" }}</td>
+                                    <td contenteditable="true" data-field="legs" data-id="{{ measurement.id }}">{{ measurement.legs|default:"-" }}</td>
+                                </tr>
+
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted text-center">Brak zapisanych pomiarów.</p>
+            {% endif %}
+
+        <a href="{% url 'add_body_measurement' %}" class="btn btn-success">Dodaj nowy pomiar</a>
+        </div>
+    </div>
+
+    <!-- Sekcja wykresów -->
+    <div class="row mt-4">
+        <div class="col-lg-4 col-md-6">
+            <h4 class="text-center">Waga</h4>
+            <div class="chart-container"><canvas id="weightChart"></canvas></div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <h4 class="text-center">Obwód klatki</h4>
+            <div class="chart-container"><canvas id="chestChart"></canvas></div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <h4 class="text-center">Obwód talii</h4>
+            <div class="chart-container"><canvas id="waistChart"></canvas></div>
+        </div>
+    </div>
+    <div class="row mt-4">
+        <div class="col-lg-4 col-md-6">
+            <h4 class="text-center">Obwód bioder</h4>
+            <div class="chart-container"><canvas id="hipsChart"></canvas></div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <h4 class="text-center">Obwód ręki</h4>
+            <div class="chart-container"><canvas id="armsChart"></canvas></div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <h4 class="text-center">Obwód uda</h4>
+            <div class="chart-container"><canvas id="legsChart"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js?update={{ now|date:"U" }}"></script>
+
+{#<script>#}
+{##}
+{##}
+{#document.addEventListener("DOMContentLoaded", function () {#}
+{#    document.querySelectorAll("td[contenteditable=true]").forEach(cell => {#}
+{#        cell.addEventListener("focus", function () {#}
+{#            this.setAttribute("data-old-value", this.innerText.trim());#}
+{#        });#}
+{##}
+{#        cell.addEventListener("blur", async function () {#}
+{#            const measurementId = this.getAttribute("data-id");#}
+{#            const field = this.getAttribute("data-field");#}
+{#            const newValue = this.innerText.trim();#}
+{#            const oldValue = this.getAttribute("data-old-value");#}
+{##}
+{#            // Sprawdzenie czy wartość się zmieniła#}
+{#            if (newValue === oldValue) return;#}
+{##}
+{#            // Walidacja wprowadzonych danych#}
+{#            if (isNaN(newValue) || newValue < 0 || newValue > 500) {#}
+{#                alert("❌ Nieprawidłowa wartość! Wprowadź liczbę w zakresie 0-500.");#}
+{#                this.innerText = oldValue; // Przywrócenie starej wartości#}
+{#                return;#}
+{#            }#}
+{##}
+{#            // Potwierdzenie zmiany wartości#}
+{#            if (!confirm(`Czy na pewno chcesz zmienić ${field} na: ${newValue}?`)) {#}
+{#                this.innerText = oldValue;#}
+{#                return;#}
+{#            }#}
+{##}
+{#            try {#}
+{#                const response = await fetch("{% url 'update_measurement' %}", {#}
+{#                    method: "PATCH",#}
+{#                    headers: {#}
+{#                        "Content-Type": "application/json",#}
+{#                        "X-CSRFToken": "{{ csrf_token }}"#}
+{#                    },#}
+{#                    body: JSON.stringify({#}
+{#                        id: measurementId,#}
+{#                        field: field,#}
+{#                        value: newValue#}
+{#                    })#}
+{#                });#}
+{##}
+{#                if (!response.ok) {#}
+{#                    throw new Error(`Błąd serwera: ${response.status}`);#}
+{#                }#}
+{##}
+{#                const data = await response.json();#}
+{#                if (data.success) {#}
+{#                    console.log("✅ Zmiana zapisana:", data);#}
+{#                    cell.setAttribute("data-old-value", newValue); // Zapisz nową wartość#}
+{#                } else {#}
+{#                    throw new Error(data.error || "Nieznany błąd");#}
+{#                }#}
+{##}
+{#            } catch (error) {#}
+{#                console.error("🔴 Błąd:", error);#}
+{#                alert("❌ Wystąpił problem: " + error.message);#}
+{#                this.innerText = oldValue; // Przywrócenie starej wartości w przypadku błędu#}
+{#            }#}
+{#        });#}
+{#    });#}
+{#});#}
+{#</script>#}
+
+
+
+<!-- JavaScript do obsługi edycji danych -->
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll("td[contenteditable=true]").forEach(cell => {
+        cell.addEventListener("blur", function () {
+            const measurementId = this.getAttribute("data-id");
+            const field = this.getAttribute("data-field");
+            const newValue = this.innerText.trim();
+            const oldValue = this.getAttribute("data-old-value") || "";
+
+            if (newValue === oldValue) return; // Jeśli wartość się nie zmieniła, nic nie rób
+
+            if (!confirm(`Czy na pewno chcesz zmienić ${field} na: ${newValue}?`)) {
+                this.innerText = oldValue; // Przywrócenie starej wartości
+                return;
+            }
+
+            fetch("{% url 'update_measurement' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    id: measurementId,
+                    field: field,
+                    value: newValue
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log("✅ Zmiana zapisana:", data);
+                    cell.setAttribute("data-old-value", newValue); // Zaktualizowanie zapamiętanej wartości
+                } else {
+                    console.error("🔴 Błąd zapisu:", data.error);
+                    alert("❌ Błąd: " + data.error);  // Wyświetlenie komunikatu o błędzie
+                    this.innerText = oldValue; // Przywrócenie starej wartości w razie błędu
+                }
+            })
+            .catch(error => {
+                console.error("🔴 Błąd sieci:", error);
+                alert("❌ Wystąpił problem z połączeniem!");
+                this.innerText = oldValue; // Przywrócenie starej wartości w razie błędu sieci
+            });
+        });
+
+        // Zapamiętaj pierwotną wartość przy rozpoczęciu edycji
+        cell.addEventListener("focus", function () {
+            this.setAttribute("data-old-value", this.innerText.trim());
+        });
+    });
+});
+</script>
+
+<!-- Twój oryginalny kod do wykresów -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const dates = {{ dates|safe }};
+    const weightData = {{ weights|safe }};
+    const chestData = {{ chest|safe }};
+    const waistData = {{ waist|safe }};
+    const hipsData = {{ hips|safe }};
+    const armsData = {{ arms|safe }};
+    const legsData = {{ legs|safe }};
+
+    function renderChart(canvasId, label, data, color) {
+        const ctx = document.getElementById(canvasId).getContext('2d');
+        if (!ctx || data.length === 0) return;
+
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dates,
+                datasets: [{
+                    label: label,
+                    data: data,
+                    borderColor: color,
+                    backgroundColor: color + '33',
+                    borderWidth: 2,
+                    pointRadius: data.map(v => v === null ? 0 : 5),
+                    pointHoverRadius: 6,
+                    fill: true,
+                    tension: 0.3,
+                    spanGaps: true
+                }]
+            },
+            options:{
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        min: 0,
+                    }
+                }
+            }
+
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        renderChart('weightChart', 'Waga (kg)', weightData, '#FF5733');
+        renderChart('chestChart', 'Obwód klatki (cm)', chestData, '#3498db');
+        renderChart('waistChart', 'Obwód talii (cm)', waistData, '#2ecc71');
+        renderChart('hipsChart', 'Obwód bioder (cm)', hipsData, '#f1c40f');
+        renderChart('armsChart', 'Obwód ręki (cm)', armsData, '#e74c3c');
+        renderChart('legsChart', 'Obwód uda (cm)', legsData, '#9b59b6');
+    });
+</script>
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Edytuj Ćwiczenie: {{ exercise.nazwa }}</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">💾 Zapisz zmiany</button>
+    </form>
+
+    <br>
+    <a href="{% url 'edit_training_plan' exercise.training_day.plan.id %}" class="btn btn-secondary">🔙 Powrót do edycji planu</a>
+</div>
+{% endblock %}

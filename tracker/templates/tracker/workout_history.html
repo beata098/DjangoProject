@@ -1,0 +1,73 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center text-primary"><i class="fas fa-history"></i> Historia Twoich Treningów</h2>
+
+    {% if workouts %}
+        <!-- ✅ Tabela w przewijanym kontenerze -->
+        <div class="table-responsive">
+            <table class="table table-striped table-hover table-bordered text-center align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>📅 Data</th>
+                        <th>🏋️ Plan treningowy</th>
+                        <th>📆 Dzień</th>
+                        <th>💪 Ćwiczenia</th>
+                        <th>⚙️ Akcje</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for workout in workouts %}
+                        <tr>
+                            <td >{{ workout.date|date:"d.m.Y" }}</td>
+                            <td>
+                                {% if workout.training_day.plan.name %}
+                                    <strong>{{ workout.training_day.plan.name }}</strong>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if workout.training_day.day_number %}
+                                    <span class="badge bg-info text-dark">Dzień {{ workout.training_day.day_number }}</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <!-- ✅ Ćwiczenia w formie listy -->
+                            <td class="text-start">
+                                <ul class="list-group list-group-flush">
+                                    {% for exercise in workout.exercises.all %}
+                                        <li class="list-group-item">
+                                            <strong>{{ exercise.name }}</strong>
+                                            <span class="text-muted"> - {{ exercise.serie }} serii x {{ exercise.powtorzenia }} powtórzeń</span>
+                                            <br>🏋️Ciężar: <strong>{{ exercise.ciezar }} kg</strong>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td class="text-end">
+                                <a href="{% url 'edit_workout' workout.id %}" class="btn btn-sm btn-warning action-btn">
+                                    <i class="fas fa-edit"></i> Edytuj
+                                </a>
+                                <a href="{% url 'delete_workout' workout.id %}" class="btn btn-sm btn-danger action-btn">
+                                    <i class="fas fa-trash-alt"></i> Usuń
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-center text-muted">Brak zapisanych treningów.</p>
+    {% endif %}
+
+    <div class="text-center mt-4">
+        <a href="{% url 'training_plans' %}" class="back-link">
+            🔙 Wróć do Planów Treningowych
+        </a>
+    </div>
+</div>
+{% endblock %}

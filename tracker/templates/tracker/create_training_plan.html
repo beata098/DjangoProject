@@ -1,0 +1,20 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Dodaj Nowy Plan Treningowy</h2>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">
+            ➡️ Przejdź do dodawania ćwiczeń
+        </button>
+    </form>
+
+    <br>
+    <a href="{% url 'training_plans' %}" class="back-link">
+        🔙 Wróć do Planów Treningowych
+    </a>
+</div>
+{% endblock %}

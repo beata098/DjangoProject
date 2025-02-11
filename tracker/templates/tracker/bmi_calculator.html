@@ -1,0 +1,125 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>📏 Kalkulator BMI</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label>Waga (kg):</label>
+        <input type="number" name="weight" class="form-control" required>
+        <label>Wzrost (cm):</label>
+        <input type="number" name="height" class="form-control" required>
+        <br>
+        <button type="submit" class="btn btn-success">Oblicz BMI</button>
+    </form>
+
+    {% if bmi %}
+        <h3>Twoje BMI: <strong>{{ bmi }}</strong> - {{ category }}</h3>
+
+        <!-- Kontener na wykres -->
+        <div class="text-center">
+            <canvas id="bmiChart" width="260" height="260"></canvas>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                var ctx = document.getElementById('bmiChart').getContext('2d');
+
+                // 🟢 Kategorie BMI i ich zakresy
+                var bmiCategories = [
+                    "Niedowaga ( < 18.5 )",
+                    "Normalna ( 18.5 - 24.9 )",
+                    "Nadwaga ( 25 - 29.9 )",
+                    "Otyłość ( ≥ 30 )"
+                ];
+                var bmiColors = ["#3498db", "#2ecc71", "#f1c40f", "#e74c3c"];
+                var bmiRanges = [18.5, 6.4, 5, 10]; // Różnice między granicami BMI (ważne!)
+
+                var userBmi = {{ bmi|default:"0" }}; // BMI użytkownika
+
+                // 🟢 **1. Znalezienie BMI w odpowiednim segmencie wykresu**
+                var startAngle = -Math.PI / 2; // Początek na górze
+                var totalAngle = Math.PI * 2; // Pełne 360 stopni
+                var cumulativeValue = 0;
+                var bmiAngle = startAngle;
+
+                for (var i = 0; i < bmiRanges.length; i++) {
+                    var sectionSize = bmiRanges[i]; // Ile BMI zajmuje dany segment
+                    var sectionStart = cumulativeValue; // Początek tej sekcji
+                    var sectionEnd = cumulativeValue + sectionSize; // Koniec tej sekcji
+                    cumulativeValue = sectionEnd; // Aktualizujemy sumę
+
+                    if (userBmi <= sectionEnd) {
+                        var sectionAngleStart = startAngle + (sectionStart / 40) * totalAngle;
+                        var sectionAngleEnd = startAngle + (sectionEnd / 40) * totalAngle;
+
+                        // Przeliczamy kąt proporcjonalnie wewnątrz sekcji
+                        var sectionBmiProgress = (userBmi - sectionStart) / sectionSize;
+                        bmiAngle = sectionAngleStart + (sectionAngleEnd - sectionAngleStart) * sectionBmiProgress;
+                        break;
+                    }
+                }
+
+                // 🟢 **2. Rysujemy kreskę we właściwej sekcji**
+                const bmiLinePlugin = {
+                    id: 'bmiLine',
+                    afterDraw: (chart) => {
+                        const { ctx, chartArea: { width, height } } = chart;
+                        const centerX = width / 2;
+                        const centerY = height / 2;
+                        const radius = Math.min(width, height) / 2 * 0.95; // Sięga do krawędzi
+
+                        // Obliczamy współrzędne końca linii na okręgu
+                        const lineX = centerX + radius * Math.cos(bmiAngle);
+                        const lineY = centerY + radius * Math.sin(bmiAngle);
+
+                        ctx.strokeStyle = "#000000";
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(centerX, centerY);
+                        ctx.lineTo(lineX, lineY);
+                        ctx.stroke();
+                    }
+                };
+
+                var data = {
+                    labels: bmiCategories,
+                    datasets: [{
+                        data: bmiRanges,
+                        backgroundColor: bmiColors
+                    }]
+                };
+
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: data,
+                    options: {
+                        responsive: false, // Stabilność rysowania
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    font: {
+                                        size: 14
+                                    },
+                                    padding: 10
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (tooltipItem) {
+                                        return bmiCategories[tooltipItem.dataIndex];
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    plugins: [bmiLinePlugin] // Dodajemy poprawiony wskaźnik BMI
+                });
+            });
+        </script>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "tracker/base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Dodaj Nowy Trening</h2>
+
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <form method="get">
+        {% csrf_token %}
+
+        <!-- Wybór planu treningowego -->
+        <div class="form-group">
+        {% if training_plans %}
+            <label for="plan">Wybierz plan treningowy:</label>
+            <select id="plan" name="plan" class="form-control" required onchange="this.form.submit()">
+                <option value="">-- Wybierz plan --</option>
+                {% for plan in training_plans %}
+                    <option value="{{ plan.id }}" {% if selected_plan and selected_plan.id == plan.id %}selected{% endif %}>
+                        {{ plan.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        {% endif %}
+        </div>
+    </form>
+
+    {% if selected_plan %}
+    <form method="get">
+        <input type="hidden" name="plan" value="{{ selected_plan.id }}">
+        <div class="form-group">
+            <label for="day">Wybierz dzień treningowy:</label>
+            <select id="day" name="day" class="form-control" required onchange="this.form.submit()">
+                <option value="">-- Wybierz dzień --</option>
+                {% for day in training_days %}
+                    <option value="{{ day.id }}" {% if selected_day and selected_day.id == day.id %}selected{% endif %}>
+                        Dzień {{ day.day_number }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+    </form>
+    {% endif %}
+
+    {% if selected_day %}
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="plan" value="{{ selected_plan.id }}">
+        <input type="hidden" name="day" value="{{ selected_day.id }}">
+
+        <h4>Ćwiczenia dla dnia {{ selected_day.day_number }}</h4>
+        <ul class="list-group">
+            {% for exercise in exercises %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">
+                        {{ exercise.nazwa }} - {{ exercise.serie }} serii x {{ exercise.powtorzenia }} powtórzeń
+                    </span>
+                    <input type="number" name="weight_{{ exercise.id }}" class="form-control" placeholder="Podaj ciężar" min="0" step="0.5" required>
+                </li>
+            {% endfor %}
+            <div class="form-group">
+                <label for="id_date">Wybierz datę treningu:</label>
+                <input type="date" id="id_date" name="date" class="form-control" required value="{{ today }}" >
+            </div>
+        </ul>
+
+        <br>
+        <button type="submit" class="btn btn-success">💾 Zapisz Trening</button>
+    </form>
+    {% endif %}
+
+    <br>
+    <a href="{% url 'dashboard' %}" class="btn btn-secondary">🔙 Powrót do dashboardu</a>
+</div>
+{% endblock %}
