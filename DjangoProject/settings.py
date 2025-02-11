@@ -73,6 +73,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'DjangoProject.wsgi.application'
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://web-production-421e.up.railway.app",
+    "http://127.0.0.1",
+    "http://localhost"
+]
 
 
 
