@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-%rrilni!#+o^*#^a$y1j+_c4m&abcd#fnw1mm83sficac9stir
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["web-production-421e.up.railway.app", "127.0.0.1", "localhost"]
 
 DJANGO_PORT=9000
 
@@ -72,6 +72,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'DjangoProject.wsgi.application'
+
+
 
 
 # Database
