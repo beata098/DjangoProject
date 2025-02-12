@@ -2,7 +2,6 @@
 
 {% block content %}
 <div class="container mt-4">
-    <!-- Historia Pomiarów -->
     <div class="card shadow-lg rounded-3">
         <div class="card-body">
             <h2 class="mb-4 text-center text-primary"><i class="fas fa-chart-line"></i> 📈 Historia Pomiarów</h2>
@@ -31,47 +30,54 @@
                                     <td contenteditable="true" data-field="hips" data-id="{{ measurement.id }}">{{ measurement.hips|default:"-" }}</td>
                                     <td contenteditable="true" data-field="arms" data-id="{{ measurement.id }}">{{ measurement.arms|default:"-" }}</td>
                                     <td contenteditable="true" data-field="legs" data-id="{{ measurement.id }}">{{ measurement.legs|default:"-" }}</td>
+                                    <td class="text-center">
+                                        <form method="post" action="{% url 'delete_measurement' measurement.id %}" class="delete-form">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger2 btn-sm" >❌</button>
+                                        </form>
+                                    </td>
                                 </tr>
-
                             {% endfor %}
                         </tbody>
                     </table>
+                <a href="{% url 'add_body_measurement' %}" class="btn btn-success d-block text-center">Dodaj nowy pomiar</a>
                 </div>
+
+                <div class="row mt-4">
+                    <div class="col-lg-4 col-md-6">
+                        <h2 class="text-center">Waga</h2>
+                        <div class="chart-container"><canvas id="weightChart"></canvas></div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <h2 class="text-center">Obwód klatki</h2>
+                        <div class="chart-container"><canvas id="chestChart"></canvas></div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <h2 class="text-center">Obwód talii</h2>
+                        <div class="chart-container"><canvas id="waistChart"></canvas></div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-lg-4 col-md-6">
+                        <h2 class="text-center">Obwód bioder</h2>
+                        <div class="chart-container"><canvas id="hipsChart"></canvas></div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <h2 class="text-center">Obwód ręki</h2>
+                        <div class="chart-container"><canvas id="armsChart"></canvas></div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <h2 class="text-center">Obwód uda</h2>
+                        <div class="chart-container"><canvas id="legsChart"></canvas></div>
+                    </div>
+                </div>
+
             {% else %}
                 <p class="text-muted text-center">Brak zapisanych pomiarów.</p>
+                <a href="{% url 'add_body_measurement' %}" class="btn btn-success d-block text-center">Dodaj nowy pomiar</a>
             {% endif %}
 
-        <a href="{% url 'add_body_measurement' %}" class="btn btn-success">Dodaj nowy pomiar</a>
-        </div>
-    </div>
 
-    <!-- Sekcja wykresów -->
-    <div class="row mt-4">
-        <div class="col-lg-4 col-md-6">
-            <h4 class="text-center">Waga</h4>
-            <div class="chart-container"><canvas id="weightChart"></canvas></div>
-        </div>
-        <div class="col-lg-4 col-md-6">
-            <h4 class="text-center">Obwód klatki</h4>
-            <div class="chart-container"><canvas id="chestChart"></canvas></div>
-        </div>
-        <div class="col-lg-4 col-md-6">
-            <h4 class="text-center">Obwód talii</h4>
-            <div class="chart-container"><canvas id="waistChart"></canvas></div>
-        </div>
-    </div>
-    <div class="row mt-4">
-        <div class="col-lg-4 col-md-6">
-            <h4 class="text-center">Obwód bioder</h4>
-            <div class="chart-container"><canvas id="hipsChart"></canvas></div>
-        </div>
-        <div class="col-lg-4 col-md-6">
-            <h4 class="text-center">Obwód ręki</h4>
-            <div class="chart-container"><canvas id="armsChart"></canvas></div>
-        </div>
-        <div class="col-lg-4 col-md-6">
-            <h4 class="text-center">Obwód uda</h4>
-            <div class="chart-container"><canvas id="legsChart"></canvas></div>
         </div>
     </div>
 </div>

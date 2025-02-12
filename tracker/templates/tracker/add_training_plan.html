@@ -11,14 +11,13 @@
     </form>
 
     {% if plan %}
-        <!-- Przycisk przekierowujący do definiowania ćwiczeń -->
         <a href="{% url 'define_training_plan' plan.id %}" class="btn btn-primary">
             ➕ Zdefiniuj Ćwiczenia dla Tego Planu
         </a>
     {% endif %}
 
     <br>
-    <a href="{% url 'training_plans' %}" class="back-link">
+    <a href="{% url 'training_plans' %}" class="btn btn-secondary">
         🔙 Wróć do Planów Treningowych
     </a>
 </div>

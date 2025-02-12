@@ -11,8 +11,7 @@
     <form method="get">
         {% csrf_token %}
 
-        <!-- Wybór planu treningowego -->
-        <div class="form-group">
+        <div class="form-group" style="font-size: 18px;">
         {% if training_plans %}
             <label for="plan">Wybierz plan treningowy:</label>
             <select id="plan" name="plan" class="form-control" required onchange="this.form.submit()">
@@ -30,7 +29,7 @@
     {% if selected_plan %}
     <form method="get">
         <input type="hidden" name="plan" value="{{ selected_plan.id }}">
-        <div class="form-group">
+        <div class="form-group" style="font-size: 18px;">
             <label for="day">Wybierz dzień treningowy:</label>
             <select id="day" name="day" class="form-control" required onchange="this.form.submit()">
                 <option value="">-- Wybierz dzień --</option>
@@ -72,6 +71,6 @@
     {% endif %}
 
     <br>
-    <a href="{% url 'dashboard' %}" class="btn btn-secondary">🔙 Powrót do dashboardu</a>
+    <a href="{% url 'dashboard' %}" class="btn-back">🔙 Powrót do dashboardu</a>
 </div>
 {% endblock %}

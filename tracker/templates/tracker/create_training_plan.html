@@ -7,13 +7,13 @@
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn btn-add">
             ➡️ Przejdź do dodawania ćwiczeń
         </button>
     </form>
 
     <br>
-    <a href="{% url 'training_plans' %}" class="back-link">
+    <a href="{% url 'training_plans' %}" class="btn-secondary">
         🔙 Wróć do Planów Treningowych
     </a>
 </div>

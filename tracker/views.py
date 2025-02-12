@@ -1,14 +1,15 @@
 import json
 import random
 from datetime import timedelta, date, datetime
+
+from django.core.checks import messages
 from django.http import JsonResponse
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_control
 from .forms import RegisterForm, BodyMeasurementForm, TrainingPlanForm, ExerciseForm
 from .models import Workout, WorkoutExercise, TrainingPlan, TrainingDay, Exercise, BodyMeasurement
-from django.shortcuts import redirect, get_object_or_404
-from django.shortcuts import render
+from django.shortcuts import redirect, get_object_or_404, render
 from django.utils.timezone import now
 
 
@@ -18,14 +19,13 @@ MOTIVATION_QUOTES = [
     "Twoje ciało może wytrzymać więcej, niż podpowiada Ci umysł.",
     "Nie czekaj. Czas nigdy nie będzie idealny.",
     "Dzisiaj robisz to, czego inni nie chcą, a jutro osiągniesz to, czego inni nie mogą.",
+    "Siła nie pochodzi z wygrywania. Twoje zmagania rozwijają Twoją siłę.",
+    "Nie liczy się to, ile razy upadniesz, ale ile razy wstaniesz.",
+    "Ból jest tymczasowy, duma trwa wiecznie!",
+    "Zacznij tam, gdzie jesteś. Użyj tego, co masz. Zrób to, co możesz.",
+    "Twój jedyny limit to ten, który sobie narzucasz."
 ]
 
-from django.http import HttpResponse
-from django.views.decorators.csrf import ensure_csrf_cookie
-
-@ensure_csrf_cookie
-def set_csrf_cookie(request):
-    return HttpResponse("CSRF cookie set")
 
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def register(request):
@@ -49,8 +49,9 @@ def dashboard(request):
 
     recent_workouts = Workout.objects.filter(
         user=request.user,
-        date__gte=now() - timedelta(days=7)
-    ).order_by('-date')
+        date__gte=now() - timedelta(days=7),
+        date__lte=now().date()
+    ).order_by('date')
     user_exercises = WorkoutExercise.objects.filter(workout__user=request.user).values_list('name', flat=True).distinct()
 
 
@@ -124,23 +125,23 @@ def training_plans(request):
     return render(request, 'tracker/training_plans.html', {'plans': plans})
 
 
-@login_required
-def add_training_plan(request):
-    if request.method == 'POST':
-        form = TrainingPlanForm(request.POST)
-        if form.is_valid():
-            plan = form.save(commit=False)
-            plan.user = request.user
-            plan.save()
-
-            # Automatyczne tworzenie dni treningowych
-            for day_number in range(1, plan.days_per_week + 1):
-                TrainingDay.objects.create(plan=plan, day_number=day_number)
-
-            return redirect('define_training_plan', plan_id=plan.id)
-    else:
-        form = TrainingPlanForm()
-    return render(request, 'tracker/add_training_plan.html', {'form': form})
+# @login_required
+# def add_training_plan(request):
+#     if request.method == 'POST':
+#         form = TrainingPlanForm(request.POST)
+#         if form.is_valid():
+#             plan = form.save(commit=False)
+#             plan.user = request.user
+#             plan.save()
+#
+#             # Automatyczne tworzenie dni treningowych
+#             for day_number in range(1, plan.days_per_week + 1):
+#                 TrainingDay.objects.create(plan=plan, day_number=day_number)
+#
+#             return redirect('define_training_plan', plan_id=plan.id)
+#     else:
+#         form = TrainingPlanForm()
+#     return render(request, 'tracker/add_training_plan.html', {'form': form})
 
 @login_required
 def add_exercise_to_day(request, day_id):
@@ -284,18 +285,18 @@ def add_exercise_to_workout(request, workout_id, day_number=1):
         'training_day': training_day
     })
 
-@login_required
-def add_training_plan(request):
-    if request.method == 'POST':
-        form = TrainingPlanForm(request.POST)
-        if form.is_valid():
-            plan = form.save(commit=False)
-            plan.user = request.user
-            plan.save()
-            return redirect('training_plans')
-    else:
-        form = TrainingPlanForm()
-    return render(request, 'tracker/add_training_plan.html', {'form': form})
+# @login_required
+# def add_training_plan(request):
+#     if request.method == 'POST':
+#         form = TrainingPlanForm(request.POST)
+#         if form.is_valid():
+#             plan = form.save(commit=False)
+#             plan.user = request.user
+#             plan.save()
+#             return redirect('training_plans')
+#     else:
+#         form = TrainingPlanForm()
+#     return render(request, 'tracker/add_training_plan.html', {'form': form})
 
 @login_required
 def edit_exercise(request, exercise_id):
@@ -396,7 +397,7 @@ def delete_workout(request, workout_id):
 
     return render(request, "tracker/delete_workout.html", {"workout": workout})
 
-
+@login_required
 def progress(request):
     measurements = BodyMeasurement.objects.filter(user=request.user).order_by("date")
 
@@ -488,6 +489,12 @@ def update_measurement(request):
             return JsonResponse({"success": False, "error": str(e)}, status=500)
 
     return JsonResponse({"success": False, "error": "Nieprawidłowe żądanie"}, status=400)
+
+@login_required
+def delete_measurement(request, measurement_id):
+    measurement = get_object_or_404(BodyMeasurement, id=measurement_id, user=request.user)
+    measurement.delete()
+    return redirect('progress')  # Przekierowanie z powrotem do historii pomiarów
 
 
 # @csrf_exempt  # Jeśli używasz standardowego Django CSRF, zamień to na @require_http_methods(["PATCH"])

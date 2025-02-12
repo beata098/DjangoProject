@@ -1,30 +1,32 @@
 {% extends "tracker/base.html" %}
 
 {% block content %}
-<h2>Twoje Plany Treningowe</h2>
+<div class="container mt-4">
+    <h2>Twoje Plany Treningowe</h2>
 
-<a href="{% url 'create_training_plan' %}" class="btn-add">➕ Dodaj Nowy Plan</a>
+    <a href="{% url 'create_training_plan' %}" class="btn-add">➕ Dodaj Nowy Plan</a>
 
-{% if plans %}
-    <ul class="plan-list">
-        {% for plan in plans %}
-            <li class="card shadow-sm plan-item">
-                <a href="{% url 'edit_training_plan' plan.id %}" class="plan-link">
-                    <div class="plan-info">
-                        <h3><strong>{{ plan.name }}</strong></h3>
-                        <p>{{ plan.get_plan_type_display }} - {{ plan.days_per_week }} dni w tygodniu</p>
+    {% if plans %}
+        <ul class="plan-list">
+            {% for plan in plans %}
+                <li class="card shadow-sm plan-item">
+                    <a href="{% url 'edit_training_plan' plan.id %}" class="plan-link">
+                        <div class="plan-info">
+                            <h2><strong>{{ plan.name }}</strong></h2>
+                            <p style="font-size: 20px;"> {{ plan.get_plan_type_display }} - {{ plan.days_per_week }} dni w tygodniu</p>
+                        </div>
+                    </a>
+                    <div class="plan-actions" style="font-size: 22px;">
+                        {#                    <a href="{% url 'edit_training_plan' plan.id %}" class="edit-btn">✏️ Edytuj</a>#}
+                        <a href="{% url 'delete_training_plan' plan.id %}" class="delete-btn">🗑 Usuń</a>
                     </div>
-                </a>
-                <div class="plan-actions">
-                    {#                    <a href="{% url 'edit_training_plan' plan.id %}" class="edit-btn">✏️ Edytuj</a>#}
-                    <a href="{% url 'delete_training_plan' plan.id %}" class="delete-btn">🗑 Usuń</a>
-                </div>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>Nie masz jeszcze żadnych planów. Dodaj swój pierwszy!</p>
-{% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Nie masz jeszcze żadnych planów. Dodaj swój pierwszy!</p>
+    {% endif %}
 
-<a href="{% url 'dashboard' %}" class="btn-back">⬅️ Wróć do Dashboardu</a>
+    <a href="{% url 'dashboard' %}" class="btn-back">⬅️ Wróć do Dashboardu</a>
+</div>
 {% endblock %}

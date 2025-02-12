@@ -15,7 +15,7 @@
         </select>
 
         {{ form.as_p }}
-        <button type="submit" class="btn btn-success">
+        <button type="submit" class="btn btn-secondary">
             ➕ Dodaj Ćwiczenie
         </button>
     </form>
@@ -31,9 +31,9 @@
             {% endfor %}
         </ul>
     {% endfor %}
+    <div style="text-align: center; align-items: center">
+        <a href="{% url 'training_plans' plan.id %}" class="btn btn-add">Zapisz Plan ✔</a>
+    </div>
 
-    <a href="{% url 'training_plans' %}" class="btn btn-primary mt-3">
-        ✔ Zapisz Plan i wróć do listy
-    </a>
 </div>
 {% endblock %}
