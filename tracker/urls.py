@@ -19,7 +19,7 @@ urlpatterns = [
     path("edytuj_cwiczenie/<int:exercise_id>/", edit_exercise, name="edit_exercise"),
     # path('plany_treningowe/dodaj_plan/', training_plans, name='training_plans'),
 
-    # path('dodaj_cwiczenie/<int:day_id>/', add_exercise, name='add_exercise'),
+    path('dodaj_cwiczenie/<int:day_id>/', add_exercise, name='add_exercise'),
     path("edytuj_plan/<int:plan_id>/", edit_training_plan, name="edit_training_plan"),
 
 

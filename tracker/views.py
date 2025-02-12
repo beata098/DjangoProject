@@ -1,10 +1,9 @@
 import json
 import random
 from datetime import timedelta, date, datetime
-
-from django.core.checks import messages
 from django.http import JsonResponse
 from django.contrib.auth import login
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.cache import cache_control
 from .forms import RegisterForm, BodyMeasurementForm, TrainingPlanForm, ExerciseForm
@@ -25,22 +24,34 @@ MOTIVATION_QUOTES = [
     "Zacznij tam, gdzie jesteś. Użyj tego, co masz. Zrób to, co możesz.",
     "Twój jedyny limit to ten, który sobie narzucasz."
 ]
-
-
 @cache_control(no_cache=True, must_revalidate=True, no_store=True)
 def register(request):
     if request.method == 'POST':
-        form = RegisterForm(request.POST)
+        form = UserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])
-            user.save()
-            login(request, user)  # Automatyczne logowanie po rejestracji
+            form.save()
             return redirect('dashboard')
     else:
-        form = RegisterForm()
+        form = UserCreationForm()
 
-    return render(request, 'tracker/register.html', {'form': form})
+    return render(request, 'registration/register.html', {'form': form})
+
+
+
+# @cache_control(no_cache=True, must_revalidate=True, no_store=True)
+# def register(request):
+#     if request.method == 'POST':
+#         form = RegisterForm(request.POST)
+#         if form.is_valid():
+#             user = form.save(commit=False)
+#             user.set_password(form.cleaned_data['password'])
+#             user.save()
+#             login(request, user)  # Automatyczne logowanie po rejestracji
+#             return redirect('dashboard')
+#     else:
+#         form = RegisterForm()
+#
+#     return render(request, 'registration/register.html', {'form': form})
 
 @login_required
 def dashboard(request):
@@ -174,22 +185,61 @@ def add_exercise(request, day_id):
 
 @login_required
 def edit_training_plan(request, plan_id):
-    plan = get_object_or_404(TrainingPlan, id=plan_id)
-    exercises = Exercise.objects.filter(training_day__plan=plan)  # Pobierz ćwiczenia przypisane do planu
+    plan = get_object_or_404(TrainingPlan, id=plan_id, user=request.user)
+    training_days = TrainingDay.objects.filter(plan=plan).order_by("day_number")  # Teraz jest querysetem
+    exercises = Exercise.objects.filter(training_day__plan=plan)
 
     if request.method == "POST":
         form = TrainingPlanForm(request.POST, instance=plan)
         if form.is_valid():
-            form.save()
-            return redirect("training_plans")  # Po edycji wracamy do listy planów
+            plan = form.save()
+
+            # Pobieramy nową liczbę dni treningowych
+            new_days_per_week = int(form.cleaned_data["days_per_week"])
+
+            # Pobieramy istniejące dni
+            existing_days = TrainingDay.objects.filter(plan=plan)
+
+            # Usuwamy nadmiarowe dni, jeśli trzeba
+            if existing_days.count() > new_days_per_week:
+                TrainingDay.objects.filter(plan=plan, day_number__gt=new_days_per_week).delete()
+
+            # Tworzymy brakujące dni treningowe
+            for day_number in range(1, new_days_per_week + 1):
+                TrainingDay.objects.get_or_create(plan=plan, day_number=day_number)
+
+            return redirect("training_plans")
+
     else:
         form = TrainingPlanForm(instance=plan)
 
     return render(request, "tracker/edit_training_plan.html", {
         "form": form,
         "plan": plan,
+        "training_days": training_days,  # Upewniamy się, że to queryset
         "exercises": exercises,
     })
+
+
+
+# @login_required
+# def edit_training_plan(request, plan_id):
+#     plan = get_object_or_404(TrainingPlan, id=plan_id)
+#     exercises = Exercise.objects.filter(training_day__plan=plan)  # Pobierz ćwiczenia przypisane do planu
+#
+#     if request.method == "POST":
+#         form = TrainingPlanForm(request.POST, instance=plan)
+#         if form.is_valid():
+#             form.save()
+#             return redirect("training_plans")  # Po edycji wracamy do listy planów
+#     else:
+#         form = TrainingPlanForm(instance=plan)
+#
+#     return render(request, "tracker/edit_training_plan.html", {
+#         "form": form,
+#         "plan": plan,
+#         "exercises": exercises,
+#     })
 
 @login_required
 def delete_training_plan(request, plan_id):

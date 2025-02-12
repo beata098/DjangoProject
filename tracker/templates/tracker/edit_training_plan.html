@@ -13,14 +13,16 @@
     <hr>
 
     <h3>Ćwiczenia w planie:</h3>
-    {% if plan.training_days.all %}
-        {% for day in plan.training_days.all %}
+    {% if training_days %}
+        {% for day in training_days %}
             <div class="day-section p-3 mb-3 border rounded bg-light">
                 <h3 class="fw-bold">Dzień {{ day.day_number }}</h3>
                 <ul class="list-group">
                     {% for exercise in day.exercises.all %}
                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span class="fw-bold;" style= "font-size: 18px;" >{{ exercise.nazwa }} - {{ exercise.serie }} serii x {{ exercise.powtorzenia }} powtórzeń</span>
+                            <span class="fw-bold;" style="font-size: 18px;">
+                                {{ exercise.nazwa }} - {{ exercise.serie }} serii x {{ exercise.powtorzenia }} powtórzeń
+                            </span>
                             <div style="display: flex; gap: 10px; align-items: center; font-size: 16px;">
                                 <a href="{% url 'edit_exercise' exercise.id %}" class="btn btn-warning btn-sm">✏ Edytuj</a>
                                 <a href="{% url 'delete_exercise' exercise.id %}" class="btn btn-danger btn-sm">🗑 Usuń</a>
@@ -33,8 +35,9 @@
             </div>
         {% endfor %}
     {% else %}
-        <p>Brak ćwiczeń w tym planie.</p>
+        <p>Brak dni treningowych w tym planie.</p>
     {% endif %}
+
 
     <br>
     <div style="text-align: center; align-items: center">
