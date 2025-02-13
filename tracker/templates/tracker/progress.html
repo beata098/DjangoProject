@@ -221,6 +221,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function renderChart(canvasId, label, data, color) {
         const ctx = document.getElementById(canvasId).getContext('2d');
+
         if (!ctx || data.length === 0) return;
 
         new Chart(ctx, {
