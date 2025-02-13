@@ -1,50 +1,99 @@
 {% extends "tracker/base.html" %}
 
 {% block content %}
-<div class="container">
-    <h2>Edytuj Plan Treningowy: {{ plan.nazwa }}</h2>
+<style>
+    .container-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+    }
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success">💾 Zapisz zmiany</button>
-    </form>
+    .left-section, .right-section {
+        width: 48%;
+    }
 
-    <hr>
+    .day-section {
+        background-color: #d7edfd;
+        border: 1px solid #d7edfd;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
 
-    <h3>Ćwiczenia w planie:</h3>
-    {% if training_days %}
-        {% for day in training_days %}
-            <div class="day-section p-3 mb-3 border rounded bg-light">
-                <h3 class="fw-bold">Dzień {{ day.day_number }}</h3>
-                <ul class="list-group">
+    .exercise-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 0;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .exercise-item:last-child {
+        border-bottom: none;
+    }
+
+    .btn-group {
+        display: flex;
+        gap: 10px;  /* Odstęp między przyciskami */
+    }
+
+    .btn-small {
+        text-decoration: none;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        border: none;
+        cursor: pointer;
+    }
+
+
+
+    .btn-save, .btn-back {
+        margin-top: 10px;
+    }
+</style>
+
+<div class="container-custom">
+    <!-- LEWA KOLUMNA - Formularz edycji planu -->
+    <div class="left-section">
+        <h2>Edytuj Plan Treningowy: {{ plan.nazwa }}</h2>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn-save">💾 Zapisz zmiany</button>
+        </form>
+
+        <a href="{% url 'training_plans' %}" class="btn-back">🔙 Powrót</a>
+    </div>
+
+
+    <div class="right-section">
+        <h3>Ćwiczenia w planie:</h3>
+
+        {% if training_days %}
+            {% for day in training_days %}
+                <div class="day-section">
+                    <h4>Dzień {{ day.day_number }}</h4>
                     {% for exercise in day.exercises.all %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <span class="fw-bold;" style="font-size: 18px;">
-                                {{ exercise.nazwa }} - {{ exercise.serie }} serii x {{ exercise.powtorzenia }} powtórzeń
-                            </span>
-                            <div style="display: flex; gap: 10px; align-items: center; font-size: 16px;">
+                        <div class="exercise-item">
+                            <span>{{ exercise.nazwa }} - {{ exercise.serie }} serii x {{ exercise.powtorzenia }} powtórzeń</span>
+                            <div class="btn-group">
                                 <a href="{% url 'edit_exercise' exercise.id %}" class="btn btn-warning btn-sm">✏ Edytuj</a>
                                 <a href="{% url 'delete_exercise' exercise.id %}" class="btn btn-danger btn-sm">🗑 Usuń</a>
                             </div>
-                        </li>
+                        </div>
                     {% empty %}
-                        <li class="list-group-item">Brak ćwiczeń dla tego dnia.</li>
+                        <p>Brak ćwiczeń dla tego dnia.</p>
                     {% endfor %}
-                </ul>
-            </div>
-        {% endfor %}
-    {% else %}
-        <p>Brak dni treningowych w tym planie.</p>
-    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>Brak dni treningowych w tym planie.</p>
+        {% endif %}
 
-
-    <br>
-    <div style="text-align: center; align-items: center">
         <a href="{% url 'add_exercise_to_plan' plan.id %}" class="btn btn-add">➕ Dodaj Ćwiczenie</a>
     </div>
-
-    <br>
-    <a href="{% url 'training_plans' %}" class="btn btn-secondary">🔙 Powrót</a>
 </div>
 {% endblock %}
