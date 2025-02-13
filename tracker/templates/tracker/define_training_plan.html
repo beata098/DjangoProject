@@ -1,39 +1,89 @@
 {% extends "tracker/base.html" %}
 
 {% block content %}
-<div class="form-container">
-    <h2>Zdefiniuj ćwiczenia dla planu: {{ plan.name }}</h2>
+<style>
+    .container-custom {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 20px;
+    }
 
-    <form method="post">
-        {% csrf_token %}
+    .left-section, .right-section {
+        width: 48%;
+    }
 
-        <label for="training_day">Wybierz dzień treningowy:</label>
-        <select name="training_day" id="training_day" required>
-            {% for day in training_days %}
-                <option value="{{ day.id }}">Dzień {{ day.day_number }}</option>
-            {% endfor %}
-        </select>
+    .day-section {
+        background-color: #d7edfd;
+        border: 1px solid #d7edfd;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
 
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-secondary">
-            ➕ Dodaj Ćwiczenie
-        </button>
-    </form>
+    .exercise-item {
+        padding: 5px 0;
+        border-bottom: 1px solid #ddd;
+    }
 
-    <h3>Obecne ćwiczenia:</h3>
-    {% for day in training_days %}
-        <h4>Dzień {{ day.day_number }}</h4>
-        <ul>
-            {% for exercise in day.exercises.all %}
-                <li>{{ exercise.nazwa }} - {{ exercise.serie }}x{{ exercise.powtorzenia }}</li>
-            {% empty %}
-                <li>Brak ćwiczeń</li>
-            {% endfor %}
-        </ul>
-    {% endfor %}
-    <div style="text-align: center; align-items: center">
-        <a href="{% url 'training_plans' %}" class="btn btn-add">Zapisz Plan ✔</a>
+    .exercise-item:last-child {
+        border-bottom: none;
+    }
+
+
+
+
+    select, input[type="text"], input[type="number"], textarea {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+</style>
+
+<div class="container-custom">
+    <!-- LEWA KOLUMNA - Formularz dodawania ćwiczenia -->
+    <div class="left-section">
+        <h2>Zdefiniuj ćwiczenia dla planu: {{ plan.name }}</h2>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <label for="training_day">Wybierz dzień treningowy:</label>
+            <select name="training_day" id="training_day" required>
+                {% for day in training_days %}
+                    <option value="{{ day.id }}">Dzień {{ day.day_number }}</option>
+                {% endfor %}
+            </select>
+
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-secondary">
+                ➕ Dodaj Ćwiczenie
+            </button>
+        </form>
     </div>
 
+    <!-- PRAWA KOLUMNA - Obecne ćwiczenia -->
+    <div class="right-section">
+        <h3>Obecne ćwiczenia:</h3>
+
+        {% for day in training_days %}
+            <div class="day-section">
+                <h4>Dzień {{ day.day_number }}</h4>
+                {% for exercise in day.exercises.all %}
+                    <div class="exercise-item">
+                        {{ exercise.nazwa }} - {{ exercise.serie }} x {{ exercise.powtorzenia }}
+                    </div>
+                {% empty %}
+                    <p>Brak ćwiczeń</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <div style="text-align: center; margin-top: 10px;">
+            <a href="{% url 'training_plans' %}" class="btn btn-add">✔ Zapisz Plan</a>
+        </div>
+    </div>
 </div>
 {% endblock %}
